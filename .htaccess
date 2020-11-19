@@ -1,0 +1,9 @@
+Options +FollowSymlinks -Indexes
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /v5/
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^index\.php$ - [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)$ public/index.php?url=$1 [QSA,L]
+</IfModule>
