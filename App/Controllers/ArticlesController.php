@@ -26,38 +26,38 @@ class ArticlesController extends Controller
      */
     public function indexAction()
     {
-        //set a limit of articles on page
+        // Set a limit of articles on page
         $limit = 5;
 
-        //take page from GET if is set. if not set:1.
+        // Take page from GET if is set. if not set:1.
         $page = $_GET['page'] ?? 1;
 
-        // for page1 show 0-5 articles, page2 show 5-10 articles, page3 show 10-15 ...
+        // For page1 show 0-5 articles, page2 show 5-10 articles, page3 show 10-15 ...
         $offset = ($page - 1) * $limit;
 
-        //find articles ([array status - only active], limit=5, with offset, sort desc)
+        // Find articles ([array status - only active], limit=5, with offset, sort desc)
         $articles = Article::find(['status' => Article::ACTIVE], $limit, $offset, ['id' => 'DESC']);
 
-        //prepare pagination
+        // Prepare pagination
         $pagination = new Pagination();
 
-        //set current page to pagination
+        // Set current page to pagination
         $pagination->setPage($page);
 
-        //count how many active articles are in database and set the number to pagination total
+        // Count how many active articles are in database and set the number to pagination total
         $pagination->setTotal(Article::count(['status' => Article::ACTIVE]));
 
-        //set limit to show 5 per page
+        // Set limit to show 5 per page
         $pagination->setLimit($limit);
 
         try {
-            //callculate previous, next and pages
+            // Callculate previous, next and pages
             $pagination->calculate();
         } catch (Exception $e) {
-            //do nothing
+            // Do nothing
         }
 
-        //send variables to view (array with articles, plus pagination data)
+        // Send variables to view (array with articles, plus pagination data)
         $this->variables = [
             'articles' => $articles,
             'pagination' => $pagination,
@@ -71,38 +71,27 @@ class ArticlesController extends Controller
      */
     public function addAction()
     {
-        //add article only if logged in
+        // Add article only if logged in
         if (!Auth::loggedIn()) {
             return redirect('auth/login');
         }
 
-        //get all active categories from database
+        // Get all active categories from database
         $categories = Category::find(['status' => Category::ACTIVE]);
 
-        // $ids = [];
-        //
-        // foreach ($categories as $category) {
-        //     $ids[] = $category->id;
-        // }
-
-
-        // $ids = array_map(function ($category) {
-        //     return $category->id;
-        // }, $categories);
-
-        //foreach category get only category ID (get only id from categories and return array).
+        // Foreach category get only category ID (get only id from categories and return array).
         $ids = array_map(fn($category) => $category->id, $categories);
 
-        //prepare validation for article (so we can use it in view before form is sent)
+        // Prepare validation for article (so we can use it in view before form is sent)
         $validation = new Validation();
 
-        //combine post and files
+        // Combine post and files
         $data = array_merge($_POST, $_FILES);
 
-        //post + files = data -----will be validated
+        // Post + files = data -----will be validated
         $validation->setData($data);
 
-        //set all rules for validation
+        // Set all rules for validation
         $validation->setRules([
             'title' => ['required', 'between:4:150'],
             'content' => ['required', 'minimum:4'],
@@ -114,23 +103,23 @@ class ArticlesController extends Controller
             'category_id' => ['required', 'in:' . join(',', $ids)]
         ]);
 
-        //set custom label in validation errors.
+        // Set custom label in validation errors.
         $validation->setLabels([
             'category_id' => 'Category', // For category_id field
         ]);
 
-        //send to view
+        // Send to view
         $this->variables = [
             'validation' => $validation,
             'categories' => (array) $categories,
         ];
 
-        //if sent
+        // If sent
         if (!empty($data)) {
-            // check all the rules and - add errors if not passed
+            // Check all the rules and - add errors if not passed
             $validation->validate();
 
-            // get errors if any
+            // Get errors if any
             $errors = $validation->getErrors();
 
             // Check whether validation on all fields passed (no errors)
@@ -138,7 +127,7 @@ class ArticlesController extends Controller
                 // Create empty article object
                 $article = new Article();
 
-                //fill the array $data[from form]
+                // Fill the array $data[from form]
                 $article->fill([
                     'category_id' => $data['category_id'],
                     'title' => $data['title'],
@@ -147,38 +136,29 @@ class ArticlesController extends Controller
                     'status' => $data['status'],
                 ]);
 
-                // if image was sent
+                // If image was sent
                 if (!empty($data['image'])) {
                     $from = $_FILES['image']['tmp_name'];
                     $to = ROOT_PATH . '/public/upload/articles/';
 
-                    //generate unique Id name
+                    // Generate unique Id name
                     $filename = uniqid();
 
-                    //pathinfo — Returns information about a file extension from sent filename
+                    // Pathinfo — Returns information about a file extension from sent filename
                     $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
 
-                    // //check if article has image in database and file exist on the disc.
-                    // if (
-                    //     $article->getImage()
-                    //     && file_exists(ROOT_PATH . '/public/upload/articles/' . $article->getImage())
-                    // ) {
-                    //     //delete current file
-                    //     unlink(ROOT_PATH . '/public/upload/articles/' . $article->getImage());
-                    // }
-
-                    //move temporary file to the right location on disc.
+                    // Move temporary file to the right location on disc.
                     $moved = move_uploaded_file($from, $to . $filename . '.' . $ext);
 
                     if ($moved) {
-                        // set image file name in the article object
+                        // Set image file name in the article object
                         $article->fill([
                             'image' => $filename . '.' . $ext,
                         ]);
                     }
                 }
 
-                //create new article in database
+                // Create new article in database
                 $article = $article->create();
 
                 set_alert('success', '<b>Success!</b> Article has been added!');
@@ -197,11 +177,11 @@ class ArticlesController extends Controller
      */
     public function detailsAction()
     {
-        //get first parameter from URL as article $id.($this->params are from Controller)
+        // Get first parameter from URL as article $id.($this->params are from Controller)
         // $id = $this->params[0];
         $id = $this->getParam();
 
-        // if NO parameters = redirect to Home Page
+        // If NO parameters = redirect to Home Page
         if (!$id) {
             return redirect('');
         }
@@ -209,31 +189,31 @@ class ArticlesController extends Controller
         /**
         * Call static function from Model which return article object or null.
         *
-        * // $article = new Article();
-        * // $article->findOne($sql, $params);
+        * $article = new Article();
+        * $article->findOne($sql, $params);
         */
         $article = Article::findById($id);
 
-        // to get author for article
+        // To get author for article
         $user = $article->getUser();
 
-        // set variable in Controller which will be sent to the Views (afterAction())
+        // Set variable in Controller which will be sent to the Views (afterAction())
         $this->variables = [
             'article' => $article,
             'author' => $user,
         ];
 
-        //start of comment validation
+        // Start of comment validation
         $validation = new Validation();
 
-        //from post data
+        // From post data
         $validation->setData($_POST);
 
         $validation->setRules([
             'content' => ['required', 'minimum:4'],
         ]);
 
-        // added to $this->variables another variable(validation).
+        // Added to $this->variables another variable(validation).
         $this->variables['validation'] = $validation;
 
         if (!empty($_POST)) {
@@ -241,19 +221,20 @@ class ArticlesController extends Controller
                 return redirect('auth/login');
             }
 
-            // check all the rules and - add errors if not passed
+            // Check all the rules and - add errors if not passed
             $validation->validate();
 
-            // get errors if any
+            // Get errors if any
             $errors = $validation->getErrors();
 
             // Check whether validation on all fields passed (no errors)
             if (!$errors) {
+
                 // Create empty comment object
                 $comment = new Comment();
 
-                // $comment->setArticleId($id);
                 // $comment->setContent($_POST['content']);
+                // $comment->setArticleId($id);
                 // $comment->setUserId(Auth::getLoggedInUserId());
 
                 $comment->fill([
@@ -262,7 +243,7 @@ class ArticlesController extends Controller
                     'user_id' => Auth::getLoggedInUserId(),
                 ]);
 
-                //insert comment to database
+                // Save comment to database
                 $comment = $comment->create();
 
                 set_alert('success', '<b>Success!</b> Comment has been added!');
@@ -285,36 +266,36 @@ class ArticlesController extends Controller
             return redirect('auth/login');
         }
 
-        //get first parameter from URL as article $id.($this->params are from Controller)
+        // Get first parameter from URL as article $id.($this->params are from Controller)
         // $id = $this->params[0];
         $id = $this->getParam();
 
-        // if NO parameters = redirect to Home Page
+        // If NO parameters = redirect to Home Page
         if (!$id) {
             return redirect('');
         }
 
-        //find article from url param id
+        // Find article from url param id
         $article = Article::findById($id);
 
         if (!$article) {
             return redirect('articles');
         }
 
-        // to get author for article
+        // To get author for article
         $user = $article->getUser();
 
         if (!$article->canEdit()) {
             return redirect('articles/details/' . $article->getId());
         }
 
-        //find all active categories
+        // Find all active categories
         $categories = Category::find(['status' => Category::ACTIVE]);
 
-        //get only the ids from the categories and return array
+        // Get only the ids from the categories and return array
         $ids = array_map(fn($category) => $category->id, $categories);
 
-        // set variable in Controller which will be sent to the Views (afterAction())
+        // Set variable in Controller which will be sent to the Views (afterAction())
         $this->variables = [
             'article' => $article,
             'author' => $user,
@@ -342,19 +323,19 @@ class ArticlesController extends Controller
             'category_id' => 'Category',
         ]);
 
-        //add variables validation to be sent to the view
+        // Add variables validation to be sent to the view
         $this->variables['validation'] = $validation;
 
         if (!empty($data)) {
-            // check all the rules and - add errors if not passed
+            // Check all the rules and - add errors if not passed
             $validation->validate();
 
-            // get errors if any
+            // Get errors if any
             $errors = $validation->getErrors();
 
             // Check whether validation on all fields passed (no errors)
             if (!$errors) {
-                // fill existing article object from form
+                // Fill existing article object from form
                 $article->fill([
                     'category_id' => $data['category_id'],
                     'title' => $data['title'],
@@ -363,34 +344,34 @@ class ArticlesController extends Controller
                     'status' => $data['status'],
                 ]);
 
-                // if image was sent and there is no upload error
+                // If image was sent and there is no upload error
                 if (isset($_FILES['image']['error']) &&  $_FILES['image']['error'] == UPLOAD_ERR_OK) {
                     $from = $_FILES['image']['tmp_name'];
                     $to = ROOT_PATH . '/public/upload/articles/';
                     $filename = uniqid();
                     $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
 
-                    //check if article has image in database and file exist on the disc.
+                    // Check if article has image in database and file exist on the disc.
                     if (
                         $article->getImage()
                         && file_exists(ROOT_PATH . '/public/upload/articles/' . $article->getImage())
                     ) {
-                        //delete current file
+                        // Delete current file
                         unlink(ROOT_PATH . '/public/upload/articles/' . $article->getImage());
                     }
 
-                    //move temporary file to the right location on disc.
+                    // Move temporary file to the right location on disc.
                     $moved = move_uploaded_file($from, $to . $filename . '.' . $ext);
 
                     if ($moved) {
-                        // set image file name in the article object
+                        // Set image file name in the article object
                         $article->fill([
                             'image' => $filename . '.' . $ext,
                         ]);
                     }
                 }
 
-                // run update sql query
+                // Run update sql query
                 $updated = $article->update();
 
                 set_alert('success', '<b>Success!</b> Article has been edited!');
@@ -415,7 +396,7 @@ class ArticlesController extends Controller
             return redirect('auth/login');
         }
 
-        //get first parameter from URL as comment $id.($this->params are from Controller)
+        // Get first parameter from URL as comment $id.($this->params are from Controller)
         // $id = $this->params[0];
         $id = $this->getParam();
 
@@ -432,12 +413,12 @@ class ArticlesController extends Controller
 
         $comments = $article->getComments();
 
-        // delete each comment in the loop
+        // Delete each comment in the loop
         foreach ($comments as $comment) {
             $comment->delete();
         }
 
-        // delete article on the end
+        // Delete article on the end
         $article->delete();
 
         set_alert('info', '<b>Success!</b> Your article has been deleted!');
@@ -452,28 +433,28 @@ class ArticlesController extends Controller
      */
     public function userAction()
     {
-        //get first parameter from URL as article $id.($this->params are from Controller)
+        // Get first parameter from URL as article $id.($this->params are from Controller)
         $id = $this->getParam();
 
-        // if NO parameters = redirect to Home Page
+        // If NO parameters = redirect to Home Page
         if (!$id) {
             return redirect('');
         }
 
-        //find user by url param id
+        // Find user by url param id
         $user = User::findById($id);
 
         if (!$user) {
             return redirect('articles');
         }
 
-        //set a limit of articles on page
+        // Set a limit of articles on page
         $limit = (int) ($_GET['limit'] ?? 5);
 
-        //take page from GET if is set. if not set:1.
+        // Take page from GET if is set. if not set:1.
         $page = (int) ($_GET['page'] ?? 1);
 
-        // for page1 show 0-5 articles, page2 show 5-10 articles, page3 show 10-15 ...
+        // For page1 show 0-5 articles, page2 show 5-10 articles, page3 show 10-15 ...
         $offset = ($page - 1) * $limit;
 
         $pagination = new Pagination();
@@ -481,30 +462,31 @@ class ArticlesController extends Controller
         $pagination
             ->setPage($page)
             ->setLimit($limit)
-            //count all active articles for the user
+
+            // Count all active articles for the user
             ->setTotal(Article::count([
                 'user_id' => $user->getId(),
                 'status' => Article::ACTIVE
             ]));
 
         try {
-            //callculate previous, next and pages
+            // Callculate previous, next and pages
             $pagination->calculate();
         } catch (Exception $e) {
-            //do nothing;
+            // Do nothing;
         }
 
-        //get active articles for the user with limit and offset
+        // Get active articles for the user with limit and offset
         $articles = $user->getArticles(['status' => Article::ACTIVE], $limit, $offset, ['id' => 'DESC']);
 
-        //tell controller to use index view from articles
+        // Tell controller to use index view from articles
         $this->setView('articles/index');
 
         $this->variables = [
             'articles' => $articles,
             'pagination' => $pagination,
 
-            //title to show name of the user's articles
+            // Title to show name of the user's articles
             'title' => "{$user->getName()}'s articles:"
         ];
     }
@@ -516,35 +498,35 @@ class ArticlesController extends Controller
      */
     public function categoryAction()
     {
-        //get first parameter from URL as category $name (not numeric)= ($this->params are from Controller)
+        // Get first parameter from URL as category $name (not numeric)= ($this->params are from Controller)
         $name = $this->getParam();
 
-        // if NO parameters = redirect to Home Page
+        // If NO parameters = redirect to Home Page
         if (!$name) {
             return redirect('');
         }
 
-        //category = find category by name column => name param from URL
+        // Category = find category by name column => name param from URL
         $category = Category::findFirst(['name' => $name]);
 
         if (!$category) {
             return redirect('articles');
         }
 
-        //set a limit of articles on page
+        // Set a limit of articles on page
         $limit = (int) ($_GET['limit'] ?? 5);
 
-        //take page from GET if is set. if not set:1.
+        // Take page from GET if is set. if not set:1.
         $page = (int) ($_GET['page'] ?? 1);
 
-        // for page1 show 0-5 articles, page2 show 5-10 articles, page3 show 10-15 ...
+        // For page1 show 0-5 articles, page2 show 5-10 articles, page3 show 10-15 ...
         $offset = ($page - 1) * $limit;
 
         $pagination = new Pagination();
 
         $pagination->setPage($page);
 
-        //count active articles for the category
+        // Count active articles for the category
         $pagination->setTotal(Article::count([
             'category_id' => $category->getId(),
             'status' => Article::ACTIVE
@@ -554,20 +536,20 @@ class ArticlesController extends Controller
         try {
             $pagination->calculate();
         } catch (Exception $e) {
-            //do nothing;
+            // Do nothing;
         }
 
-        //get active articles for the category with limit and offset
+        // Get active articles for the category with limit and offset
         $articles = $category->getArticles(['status' => Article::ACTIVE], $limit, $offset, ['id' => 'DESC']);
 
-        //tell controller to use index view from articles
+        // Tell controller to use index view from articles
         $this->setView('articles/index');
 
         $this->variables = [
             'articles' => $articles,
             'pagination' => $pagination,
 
-            //show title of category
+            // Show title of category
             'title' => "{$category->getTitle()} articles:"
         ];
     }
