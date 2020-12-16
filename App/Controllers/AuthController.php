@@ -21,33 +21,34 @@ class AuthController extends Controller
      */
     public function loginAction(): void
     {
-        // create empty object to validate global POST variable
+        // Create empty object to validate global POST variable
         $validation = new Validation();
 
-        // set global POST variable as a $data to validate
+        // Set global POST variable as a $data to validate
         $validation->setData($_POST);
 
-        // set Rules for data
+        // Set Rules for data
         $validation->setRules([
             'email' => ['required', 'email', 'exist'],
             'password' => ['required', 'between:4:32'],
         ]);
 
-        // pass all variables to the view
+        // Pass all variables to the view
         $this->variables = [
             'validation' => $validation,
         ];
 
         // Validate if post is sent
         if (!empty($_POST)) {
-            // check all the rules and - add errors if not passed
+            // Check all the rules and - add errors if not passed
             $validation->validate();
 
-            // get errors if any
+            // Get errors if any
             $errors = $validation->getErrors();
 
             // Check whether validation on all fields passed (no errors)
             if (!$errors) {
+
                 // Try to get user by email and password (data from POST controller)
                 $user = User::findFirst([
                     'email' => $_POST['email'],
@@ -94,28 +95,28 @@ class AuthController extends Controller
     {
         $validation = new Validation();
 
-        // set global POST variable as a $data to validate
+        // Set global POST variable as a $data to validate
         $validation->setData($_POST);
 
-        // set Rules for data
+        // Set Rules for data
         $validation->setRules([
             'name' => ['required', 'minimum:5', 'maximum:32'],
             'email' => ['required', 'email', 'unique:users'],
             'password' => ['required', 'minimum:4', 'maximum:32'],
         ]);
 
-        // pass all variable to the view
+        // Pass all variable to the view
         $this->variables = [
-            //key-value  sent to the views
+            // Key-value  sent to the views
             'validation' => $validation,
         ];
 
         // Validate if post is sent
         if (!empty($_POST)) {
-            // check all the rules and - add errors if not passed
+            // Check all the rules and - add errors if not passed
             $validation->validate();
 
-            // get errors if any
+            // Get errors if any
             $errors = $validation->getErrors();
 
             // Check whether validation on all fields passed (no errors)
@@ -129,7 +130,7 @@ class AuthController extends Controller
                      'password' => md5(SECRET . $_POST['password']),
                 ]);
 
-                //Store user in database
+                // Store user in database
                  $created = $user->create();
 
                  set_alert('success', '<b>Success!</b> Now you can log in!');
