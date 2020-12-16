@@ -17,6 +17,6 @@ class NotFoundController extends Controller
      */
     public function indexAction(): void
     {
-        //echo 'Not found';
+        // echo 'Not found';
     }
 }

@@ -29,43 +29,44 @@ class UsersController extends Controller
             return redirect('auth/login');
         }
 
-        //get user from session
+        // Get user from session
         $user = Auth::getUser();
 
-        // assign everything to data variable(to keep POST variable original)
+        // Assign everything to data variable(to keep POST variable original)
         $data = $_POST;
 
-        // check if password field is not empty
+        // Check if password field is not empty
         if (!empty($data['password'])) {
-            //get password from POST and hash it!
+
+            // Get password from POST and hash it!
             $data['password'] = md5(SECRET . $data['password']);
         }
 
-        // put a newpassword into variable $newPassword (??- empty string to avoid errors on 1st load)
+        // Put a newpassword into variable $newPassword (??- empty string to avoid errors on 1st load)
         $newPassword = $data['newpassword'] ?? '';
 
         $validation = new Validation();
 
-        // set global POST variable as a $data to validate
+        // Set global POST variable as a $data to validate
         $validation->setData($data);
 
-        // set Rules for data
+        // Set Rules for data
         $validation->setRules([
-            // checked if hashed password from post equils hashed password from database
+            // Checked if hashed password from post equils hashed password from database
             'password' => ['required', "same:{$user->getPassword()}"],
             'newpassword' => ['required', 'between:4:32'],
-            // checked if confirmnewpassword password from post equils new password from post
+            // Checked if confirmnewpassword password from post equils new password from post
             'confirmnewpassword' => ['required', "same:{$newPassword}"],
         ]);
 
-        //set custom labels for the fields in validation errors
+        // Set custom labels for the fields in validation errors
         $validation->setLabels([
             'password' => 'Password',
             'newpassword' => 'New password',
             'confirmnewpassword' => 'Confirm new password',
         ]);
 
-        // pass all variable to the view
+        // Pass all variable to the view
         $this->variables = [
             'validation' => $validation,
             'user' => $user,
@@ -73,10 +74,10 @@ class UsersController extends Controller
 
         // Validate if post is sent
         if (!empty($_POST)) {
-            // check all the rules and - add errors if not passed
+            // Check all the rules and - add errors if not passed
             $validation->validate();
 
-            // get errors if any
+            // Get errors if any
             $errors = $validation->getErrors();
 
             // Check whether validation on all fields passed (no errors)
@@ -107,19 +108,16 @@ class UsersController extends Controller
             return redirect('auth/login');
         }
 
-        //from session
-        //$id = Auth::getLoggedInUserId();
-
-        //get logged in user object
+        // Get logged in user object
         $user = Auth::getUser();
 
-        //validate image
+        // Validate image
         $validation = new Validation();
 
-        // set global FILES variable as a data to validate
+        // Set global FILES variable as a data to validate
         $validation->setData($_FILES);
 
-        // set Rules for data
+        // Set Rules for data
         $validation->setRules([
             'image' => [
                 'file:image/jpeg,image/png',
@@ -127,15 +125,15 @@ class UsersController extends Controller
             ],
         ]);
 
-        // pass all variables to the view
+        // Pass all variables to the view
         $this->variables = [
             'validation' => $validation,
         ];
 
-        // check all of the rules
+        // Check all of the rules
         $validation->validate();
 
-        // get errors if any
+        // Get errors if any
         $errors = $validation->getErrors();
 
         if (isset($_FILES['image']['error']) &&  $_FILES['image']['error'] == UPLOAD_ERR_OK) {
@@ -145,22 +143,22 @@ class UsersController extends Controller
                 $filename = $user->getId();
                 $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
 
-                //check if user has image in database and file exist on the disc.
+                // Check if user has image in database and file exist on the disc.
                 $user->deleteImageFile();
 
-                //move temporary file to the right location on disc.
+                // Move temporary file to the right location on disc.
                 $moved = move_uploaded_file($from, $to . $filename . '.' . $ext);
 
                 if ($moved) {
-                    // set image file name in the user object
+                    // Set image file name in the user object
                     $user->fill([
                         'image' => $filename . '.' . $ext,
                     ]);
 
-                    //update new user image (name) in database.
+                    // Update new user image (name) in database.
                     $user->update();
 
-                    //refresh user in the session
+                    // Refresh user in the session
                     Auth::login($user);
 
                     return redirect("users");
@@ -182,17 +180,17 @@ class UsersController extends Controller
             return redirect('auth/login');
         }
 
-        //get logged in user object
+        // Get logged in user object
         $user = Auth::getUser();
 
-        //set null as image
+        // Set null as image
         $user->fill([
             'image' => null,
         ]);
 
         $user->update();
 
-        //refresh user in the session
+        // Refresh user in the session
         Auth::login($user);
 
         return redirect("users");
@@ -209,26 +207,26 @@ class UsersController extends Controller
             return redirect('auth/login');
         }
 
-        //from session
+        // Get $id from session
         $id = Auth::getLoggedInUserId();
 
-        //get logged in user object
+        // Get logged in user object
         $user = User::findById($id);
 
-        //set a limit of articles on page
+        // Set a limit of articles on page
         $limit = (int) ($_GET['limit'] ?? 5);
 
-        //take page from GET if is set. if not set:1.
+        // Take page from GET if is set. if not set to:1.
         $page = (int) ($_GET['page'] ?? 1);
 
-        // for page1 show 0-5 articles, page2 show 5-10 articles, page3 show 10-15 ...
+        // For page1 show 0-5 articles, page2 show 5-10 articles, page3 show 10-15 ...
         $offset = ($page - 1) * $limit;
 
         $pagination = new Pagination();
 
         $pagination->setPage($page);
 
-        //count all articles (pending,active,deleted) for logged in user
+        // Count all articles (pending,active,deleted) for logged in user
         $pagination->setTotal(Article::count([
             'user_id' => $user->getId(),
         ]));
@@ -237,13 +235,13 @@ class UsersController extends Controller
         try {
             $pagination->calculate();
         } catch (Exception $e) {
-            // dont do anything
+            // Dont do anything
         }
 
-        //get users articles with limit and offset in desc order
+        // Get users articles with limit and offset in desc order
         $articles = $user->getArticles([], $limit, $offset, ['id' => 'DESC']);
 
-        //send to view
+        // Send to view
         $this->variables = [
             'articles' => $articles,
             'pagination' => $pagination
@@ -262,32 +260,28 @@ class UsersController extends Controller
         }
 
         if (Auth::isAdmin()) {
-            //$categories = Category::find(['status' => Category::ACTIVE]);
 
-            //$ids = array_map(fn($category) => $category->id, $categories);
-
-            //prepare validation for article (so we can use it in view before form is sent)
+            // Prepare validation for article (so we can use it in view before form is sent)
             $validation = new Validation();
 
             $validation->setData($_POST);
 
-            //set all rules for validation
+            // Set all rules for validation
             $validation->setRules([
                 'name' => ['required', 'between:4:150', 'unique:categories'],
                 'title' => ['required', 'between:4:150'],
                 'status' => ['required', 'in:' . join(',', [Category::PENDING, Category::ACTIVE])],
             ]);
 
-            //send to view
+            // Send to view
             $this->variables = [
                 'validation' => $validation,
-                //'categories' => (array) $categories,
             ];
 
             if (!empty($_POST)) {
                 $validation->validate();
 
-                // get errors if any
+                // Get errors if any
                 $errors = $validation->getErrors();
 
                 // Check whether validation on all fields passed (no errors)
@@ -295,6 +289,7 @@ class UsersController extends Controller
                     // Create empty article object
                     $category = new Category();
 
+                    // Fill data from $_POST
                     $category->fill([
                         'name' => $_POST['name'],
                         'title' => $_POST['title'],

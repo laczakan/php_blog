@@ -82,13 +82,13 @@ class Controller
     public function afterAction()
     {
         // Add view as a variable available in the all views
-        // by default all views are in helpers.
+        // By default all views are in helpers.
         $this->variables['view'] =  $this->view;
 
         // Make other variables accessable in the view
         $variables = $this->variables;
         
-        // load template and pass variables as a second parameter
+        // Load template and pass variables as a second parameter
         load_view($this->template, $variables);
     }
 }
