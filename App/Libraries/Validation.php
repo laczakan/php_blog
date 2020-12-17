@@ -17,7 +17,7 @@ class Validation
 
     protected $rules = [];
 
-    //field 'name' in error message.
+    // Field 'name' in error message.
     protected $labels = [];
 
     protected $errors = [];
@@ -77,7 +77,7 @@ class Validation
      */
     public function getError($name)
     {
-        // function current- expects an array (current — Return the current element in an array)
+        // Function current- expects an array (current — Return the current element in an array)
         return current($this->errors[$name] ?? []);
     }
 
@@ -117,7 +117,7 @@ class Validation
             foreach ($fieldRules as $rule) {
                 // Split a string by a caracter ':' if has options
                 $exploded = explode(':', $rule);
-                // use 1st exploded name as a $ruleName
+                // Use 1st exploded name as a $ruleName
                 $ruleName = $exploded[0];
 
                 switch ($ruleName) {

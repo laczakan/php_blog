@@ -3,20 +3,21 @@
 /**
  * Redirect user to a different page.
  *
- * @param string $page Url to redirect, home page if empty
+ * @param string $page
  *
  * @return bool
  */
 function redirect($page = null)
 {
-    // add location header which redirect to new location.
+    // Add location header which redirect to new location.
     header('Location: ' . ROOT_URL . BASE_URL . $page);
     return false;
 }
 
 /**
  *  Dump variables using var_dump and die.
- *  func_get_args() Returns an array comprising a function's argument list, 3 dots changes for arguments.
+ *  func_get_args()
+ * Returns an array comprising a function's argument list, 3 dots changes for arguments.
  *
  * @return void
  */
@@ -68,8 +69,8 @@ function load_view($name, $variables = [])
  */
 function url(string $uri, $root = false)
 {
-    // if $root true then add ROOT_URL else empty string,
-    // concatenate BASE_URL and passed $uri string
+    // If $root true then add ROOT_URL else empty string,
+    // Concatenate BASE_URL and passed $uri string
     return ($root ? ROOT_URL : '') . BASE_URL . $uri;
 }
 
@@ -84,7 +85,7 @@ function url(string $uri, $root = false)
  */
 function set_alert($type, $message)
 {
-    //add alert to session
+    // Add alert to session
     $_SESSION['alert'] = [
         'type' => $type,
         'message' => $message,
@@ -120,7 +121,7 @@ function get_alert()
 
     $alert = $_SESSION['alert'];
 
-    //bootstrap 4 alert - sent to the view as optput
+    // Bootstrap 4 alert - sent to the view as optput
     $output = '<div class="alert alert-' . $alert['type'] . ' alert-dismissible fade show" role="alert">' .
         $alert['message'] .
         '<button type="button" class="close" data-dismiss="alert">' .
@@ -128,7 +129,7 @@ function get_alert()
         '</button>' .
     '</div>';
 
-    //remove alert from session
+    // Remove alert from session
     unset($_SESSION['alert']);
 
     return $output;

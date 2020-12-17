@@ -86,7 +86,7 @@ class Auth
     {
         $user = self::getUser();
 
-        //$user->admin (check if user is admin in database - set to 1)
+        // $user->admin (check if user is admin in database - set to 1)
         if (!$user || !$user->admin) {
             return false;
         }
@@ -103,7 +103,7 @@ class Auth
     {
         $user = self::getUser();
 
-        //check if is logged in and (check if user is moderator in database - set to 1)
+        // Check if is logged in and (check if user is moderator in database - set to 1)
         if (!$user || !$user->moderator) {
             return false;
         }

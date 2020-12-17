@@ -20,7 +20,7 @@ class Str
      */
     public static function camel($input, $separator = '_')
     {
-        //replace separator with '' (empty space) and Capitalize.
+        // Replace separator with '' (empty space) and Capitalize.
         return str_replace($separator, '', ucwords($input, $separator));
     }
 
