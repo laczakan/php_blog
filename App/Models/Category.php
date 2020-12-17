@@ -26,13 +26,13 @@ class Category extends Model
      */
     public function getArticles(array $filters = [], $limit = 0, $offset = 0): array
     {
-        //by default return all articles (if filter is pending) - return just pending.
+        // By default return all articles (if filter is pending) - return just pending.
         return Article::find(
             // Merge additional filters if specified
             array_merge(['category_id' => $this->id], $filters),
             $limit,
             $offset,
-            ['id' => 'DESC'] // order
+            ['id' => 'DESC'] // Order
         );
     }
 }

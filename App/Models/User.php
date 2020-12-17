@@ -24,7 +24,7 @@ class User extends Model
     public function getArticles(array $filters = [], $limit = 0, $offset = 0): array
     {
         $order = ['id' => 'DESC'];
-        //by default return all articles (if filter is pending) - return just pending.
+        // By default return all articles (if filter is pending) - return just pending.
         return Article::find(
             array_merge(['user_id' => $this->id], $filters),
             $limit,
@@ -69,7 +69,7 @@ class User extends Model
     public function deleteImageFile()
     {
         if ($this->image && file_exists(ROOT_PATH . '/public/upload/users/' . $this->image)) {
-            //delete current file
+            // Delete current file
             unlink(ROOT_PATH . '/public/upload/users/' . $this->image);
         }
     }

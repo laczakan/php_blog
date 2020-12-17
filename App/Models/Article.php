@@ -12,7 +12,7 @@ use App\Libraries\Auth;
  */
 class Article extends Model
 {
-    //set table name
+    // Set table name
     protected $table = 'articles';
 
     public const ACTIVE = 'active';
@@ -26,7 +26,7 @@ class Article extends Model
      */
     public function getUser(): User
     {
-        // its for loaded article (must be loaded before in controller)
+        // Its for loaded article (must be loaded before in controller)
         return User::findById($this->user_id);
     }
 

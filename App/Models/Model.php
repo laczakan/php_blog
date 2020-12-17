@@ -31,7 +31,7 @@ class Model extends Database implements \Serializable
 
     /**
      * Magic set ($this->title = 'lorem') - set value to the index in attributes.
-     * if there is none property with that name
+     * If there is none property with that name
      *
      * @param $name  attribute name to set
      * @param $value value to set
@@ -62,7 +62,7 @@ class Model extends Database implements \Serializable
 
     /**
      * Assign properties from array['id'] = 1 to Model object.($this->id = 1)
-     * convert generic Object (stdClass) to an array
+     * Convert generic Object (stdClass) to an array
      *
      * @param $data data to fill
      *
@@ -71,7 +71,7 @@ class Model extends Database implements \Serializable
     public function fill(array $data)
     {
         foreach ($data as $key => $value) {
-            //adding key as value to attributes
+            // Adding key as value to attributes
             $this->attributes[$key] = $value;
         }
     }
@@ -165,7 +165,7 @@ class Model extends Database implements \Serializable
     {
         $model = current(self::find($filters, 1));
 
-        //if true(find) return model if false(not results) return null
+        // If true(find) return model if false(not results) return null
         return $model ? $model : null;
     }
 
@@ -218,30 +218,30 @@ class Model extends Database implements \Serializable
         // create new model object (depending on Model name)
         $model = new static();
 
-        // get table name from Model Instance
+        // Get table name from Model Instance
         $sql = "SELECT * FROM `$model->table`";
 
         // NO parameter by default
         $params = [];
 
-        //if any filter sent
+        // If any filter sent
         if ($filters) {
-            // treat filters as parameters
+            // Treat filters as parameters
             $params = $filters;
 
-            // add...  SELECT * FROM `articles` WHERE  to sql
+            // Add...  SELECT * FROM `articles` WHERE  to sql
             $sql .= " WHERE ";
 
-            // prepare array for more than 1 filter
+            // Prepare array for more than 1 filter
             $arr = [];
 
-            //prepare parameters to bind
+            // Prepare parameters to bind
             foreach ($filters as $key => $value) {
                 if (is_array($value)) {
                     // @TODO: fix in()
                     $arr[] = "`$key` IN(:$key)";
                 } else {
-                    // add binded filters to array
+                    // Add binded filters to array
                     // `user_id` = :user_id
                     $arr[] = "`$key` = :$key";
                 }
@@ -266,24 +266,24 @@ class Model extends Database implements \Serializable
             $sql .= " OFFSET $offset";
         }
 
-        // find all generic results (from database)
-        //The parameter PDO::FETCH_ASSOC tells PDO to return the result as an associative array.
+        // Find all generic results (from database)
+        // The parameter PDO::FETCH_ASSOC tells PDO to return the result as an associative array.
         $results = $model->findAll($sql, $params, PDO::FETCH_ASSOC);
 
-        //return empty array if NO results
+        // Return empty array if NO results
         if (!$results) {
             return $models;
         }
 
-        // go through results and add model object to the models
+        // Go through results and add model object to the models
         foreach ($results as $result) {
-            // create empty model object
+            // Create empty model object
             $model = new static();
 
-            // fill the object from the result
+            // Fill the object from the result
             $model->fill($result);
 
-            // add model object to models array.
+            // Add model object to models array.
             $models[] = $model;
         }
 
@@ -304,24 +304,24 @@ class Model extends Database implements \Serializable
         $model = new static();
 
         // Prepare SQL query
-        //count — Count all elements in an array, or something in an object (set 'total' as alias)
-        $sql = "SELECT count(*) AS `total` FROM `$model->table`";
+        // Count — Count all elements in an array, or something in an object (set 'total' as alias)
+        $sql = "SELECT count(*) AS `total` FROM `$model->table";
 
         $params = [];
 
         if ($filters) {
-            // treat filters as parameters
+            // Treat filters as parameters
             $params = $filters;
 
-            // add...  SELECT * FROM `articles` WHERE  to sql
+            // Add...  SELECT * FROM `articles` WHERE  to sql
             $sql .= " WHERE ";
 
-            // prepare array for more than 1 filter
+            // Prepare array for more than 1 filter
             $arr = [];
 
-            //prepare parameters to bind
+            // Prepare parameters to bind
             foreach ($filters as $key => $value) {
-                // add binded filters to array
+                // Add binded filters to array
                 $arr[] = "`$key` = :$key";
             }
 
@@ -332,7 +332,7 @@ class Model extends Database implements \Serializable
         // Execute query and the status
         $result = $model->findOne($sql, $params);
 
-        //return result ->total (set in sql AS custom collumn 'total')
+        // Return result ->total (set in sql AS custom collumn 'total')
         return (int) $result->total;
     }
 

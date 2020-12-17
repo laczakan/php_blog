@@ -24,7 +24,7 @@ class Comment extends Model
      */
     public function getUser(): User
     {
-        // its for loaded comments (must be loaded before)
+        // It's for loaded comments (must be loaded before)
         return User::findById($this->user_id);
     }
 
