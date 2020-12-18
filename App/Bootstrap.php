@@ -39,7 +39,7 @@ class Bootstrap
         // Require app config where we define URL constants
         include_once 'config/app.php';
 
-        //  Require database config where we define database constants
+        // Require database config where we define database constants
         include_once 'config/database.php';
 
         // Require helpers from helpers folder

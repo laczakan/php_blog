@@ -38,7 +38,7 @@ class ArticlesController extends Controller
         // Find articles ([array status - only active], limit=5, with offset, sort desc)
         $articles = Article::find(['status' => Article::ACTIVE], $limit, $offset, ['id' => 'DESC']);
 
-        // Prepare pagination
+        // Prepare pagination (create manual)
         $pagination = new Pagination();
 
         // Set current page to pagination
