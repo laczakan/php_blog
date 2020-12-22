@@ -305,7 +305,7 @@ class Model extends Database implements \Serializable
 
         // Prepare SQL query
         // Count — Count all elements in an array, or something in an object (set 'total' as alias)
-        $sql = "SELECT count(*) AS `total` FROM `$model->table";
+        $sql = "SELECT count(*) AS `total` FROM `$model->table`";
 
         $params = [];
 
